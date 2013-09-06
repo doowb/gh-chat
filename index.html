@@ -31,7 +31,7 @@
         controller('ChatController', ['$scope', 'angularFire',
           function($scope, angularFire) {
             var ref = new Firebase('https://gh-chat.firebaseio.com');
-            angularFire(ref, $scope, "messages");
+            $scope.messages = [];
             $scope.username = 'Guest' + Math.floor(Math.random()*101);
             $scope.addMessage = function() {
               $scope.messages.push({
@@ -39,6 +39,7 @@
               });
               $scope.message = '';
             };
+            angularFire(ref, $scope, "messages");
           }]);
     </script>
   </body>
