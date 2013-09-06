@@ -28,7 +28,7 @@
 
     <script type="text/javascript">
       angular.module('chat', ['firebase']).
-        controller('Chat', ['$scope', 'angularFire',
+        controller('ChatController', ['$scope', 'angularFire',
           function($scope, angularFire) {
             var ref = new Firebase('https://gh-chat.firebaseio.com');
             angularFire(ref.limit(15), $scope, "messages");
