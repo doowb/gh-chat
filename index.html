@@ -1,4 +1,4 @@
-<html>
+<html ng-app="chat">
 
   <head>
     <title>AngularJS / Firebase Chatroom</title>
@@ -7,30 +7,39 @@
   
   <body>
 
-    <div class="well" ng-app="chat" ng-controller="ChatController">
-      <form class="form-inline">
-        Your name: <input type="text" ng-model="username">
-      </form>
-      <div ng-cloak ng-repeat="message in messages">
-        <em>{{message.from}}: </em>{{message.content}}
-      </div><br />
-      <form class="form-inline" ng-submit="addMessage()">
-        <input type="text" ng-model="message" placeholder="Message...">
-        <button class="btn" type="submit">
-          <i class="icon-reply"> Send</i>
-        </button>
-      </form>
+    <div ng-controller="ChatController">
+      <div class="well" ng-show="user">
+        <form class="form-inline">
+          Your name: <input type="text" ng-model="username" ng-diabled="user">
+        </form>
+        <div ng-cloak ng-repeat="message in messages">
+          <em>{{message.from}}: </em>{{message.content}}
+        </div><br />
+        <form class="form-inline" ng-submit="addMessage()">
+          <input type="text" ng-model="message" placeholder="Message...">
+          <button class="btn" type="submit">
+            <i class="icon-reply"> Send</i>
+          </button>
+        </form>
+      </div>
+
+      <div class="well" ng-hide="user">
+        <button class="btn" ng-click="login()">Login with Github</button>
+      </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.1.5/angular.min.js"></script>
     <script src="https://cdn.firebase.com/v0/firebase-debug.js"></script>
+    <script scr="https://cdn.firebase.com/v0/firebase-simple-login.js"></script>
     <script src="https://cdn.firebase.com/libs/angularfire/0.3.0/angularfire.min.js"></script>
 
     <script type="text/javascript">
       angular.module('chat', ['firebase']).
-        controller('ChatController', ['$scope', 'angularFire',
-          function($scope, angularFire) {
+        controller('ChatController', ['$scope', 'angularFire', 'angularFireAuth',
+          function($scope, angularFire, angularFireAuth) {
+
             var ref = new Firebase('https://gh-chat.firebaseio.com');
+            
             $scope.messages = [];
             $scope.username = 'Guest' + Math.floor(Math.random()*101);
             $scope.addMessage = function() {
@@ -40,6 +49,19 @@
               $scope.message = '';
             };
             angularFire(ref, $scope, "messages");
+
+            $scope.login = function() {
+              angularFireAuth.login('github');
+            };
+
+            $scope.logout = function() {
+              angularFireAuth.logout();
+            };
+
+            $scope.$on("angularFireAuth:login", function(evt, user) {
+              $scope.username = user.username;
+            });
+
           }]);
     </script>
   </body>
