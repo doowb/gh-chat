@@ -10,7 +10,7 @@
     <div ng-controller="ChatController">
       <div class="well" ng-show="user">
         <form class="form-inline">
-          Your name: <input type="text" ng-model="username" ng-diabled="user">
+          Your name: <input type="text" ng-model="username" ng-diable="user">
         </form>
         <div ng-cloak ng-repeat="message in messages">
           <em>{{message.from}}: </em>{{message.content}}
