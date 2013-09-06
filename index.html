@@ -29,16 +29,47 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.1.5/angular.min.js"></script>
-    <script src="https://cdn.firebase.com/v0/firebase-debug.js"></script>
-    <script scr="https://cdn.firebase.com/v0/firebase-simple-login.js"></script>
+    <script src="https://cdn.firebase.com/v0/firebase.js"></script>
+    <script src='https://cdn.firebase.com/v0/firebase-simple-login.js'></script>
     <script src="https://cdn.firebase.com/libs/angularfire/0.3.0/angularfire.min.js"></script>
 
     <script type="text/javascript">
       angular.module('chat', ['firebase']).
-        controller('ChatController', ['$scope', 'angularFire', 'angularFireAuth',
-          function($scope, angularFire, angularFireAuth) {
+        factory('safeApply', [function($rootScope) {
+          return function($scope, fn) {
+            var phase = $scope.$root.$$phase;
+            if(phase == '$apply' || phase == '$digest') {
+              if(fn) {
+                $scope.$eval(fn);
+              }
+            } else {
+              if(fn) {
+                $scope.$apply(fn);
+              } else {
+                $scope.$apply();
+              }
+            }
+          };
+        }]).
+        controller('ChatController', ['$scope', 'safeApply', 'angularFire',
+          function($scope, safeApply, angularFire) {
 
             var ref = new Firebase('https://gh-chat.firebaseio.com');
+            var authClient = new FirebaseSimpleLogin(ref, function(error, user) {
+              if(error) {
+                console.log("Error: ", error);
+              } else if(user) {
+                // log the user into the app
+                $scope.user = user;
+                $scope.username = user.id;
+
+              } else {
+
+                $scope.user = null;
+
+              }
+              safeApply($scope);
+            });
             
             $scope.messages = [];
             $scope.username = 'Guest' + Math.floor(Math.random()*101);
@@ -51,16 +82,13 @@
             angularFire(ref, $scope, "messages");
 
             $scope.login = function() {
-              angularFireAuth.login('github');
+              console.log('logging in');
+              authClient.login('github');
             };
 
             $scope.logout = function() {
-              angularFireAuth.logout();
+              authClient.logout();
             };
-
-            $scope.$on("angularFireAuth:login", function(evt, user) {
-              $scope.username = user.username;
-            });
 
           }]);
     </script>
